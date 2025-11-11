@@ -259,8 +259,16 @@ class ClienteResource extends Resource
 
                 Tables\Columns\TextColumn::make('proxima_facturacion')
                     ->label('Próxima Facturación')
-                    ->getStateUsing(fn (Cliente $record) => $record->proxima_facturacion ?? '-')
-                    ->date('d/M/Y'),
+                    ->getStateUsing(function (Cliente $record) {
+                        if (!$record->proxima_facturacion) {
+                            return '-';
+                        }
+                        try {
+                            return \Carbon\Carbon::parse($record->proxima_facturacion)->format('d/M/Y');
+                        } catch (\Exception $e) {
+                            return '-';
+                        }
+                    }),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado')
