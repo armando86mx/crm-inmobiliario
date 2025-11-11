@@ -244,11 +244,12 @@ class ClienteResource extends Resource
                 Tables\Columns\TextColumn::make('proxima_facturacion')
                     ->label('Próxima Facturación')
                     ->getStateUsing(function (Cliente $record) {
-                        if (!$record->proxima_facturacion) {
+                        $fecha = $record->proxima_facturacion;
+                        if (!$fecha) {
                             return '-';
                         }
                         try {
-                            return \Carbon\Carbon::parse($record->proxima_facturacion)->format('d/M/Y');
+                            return $fecha->format('d/M/Y');
                         } catch (\Exception $e) {
                             return '-';
                         }

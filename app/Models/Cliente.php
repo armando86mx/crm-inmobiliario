@@ -141,36 +141,45 @@ class Cliente extends Model
 
     /**
      * Computed property: Próxima fecha de facturación
-     * Calcula fecha según dia_ciclo
+     * Calcula fecha según dia_ciclo y frecuencia
      */
-    public function getProximaFacturacionAttribute(): ?string
+    public function getProximaFacturacionAttribute()
     {
-        if ($this->estado === 'prospecto' || !$this->dia_ciclo || !$this->fecha_activacion) {
+        // Validaciones: debe estar activo y tener configuración completa
+        if ($this->estado !== 'activo') {
+            return null;
+        }
+
+        if (!$this->dia_ciclo || !$this->frecuencia || !$this->fecha_activacion) {
             return null;
         }
 
         $now = now();
-        $year = $now->year;
-        $month = $now->month;
+        $fechaActivacion = \Carbon\Carbon::parse($this->fecha_activacion);
 
-        // Si el día del ciclo ya pasó este mes, calcular para el próximo mes
-        if ($now->day >= $this->dia_ciclo) {
-            $month++;
-            if ($month > 12) {
-                $month = 1;
-                $year++;
-            }
+        // Determinar meses a sumar según frecuencia
+        $mesesPorCiclo = match($this->frecuencia) {
+            'mensual' => 1,
+            'semestral' => 6,
+            'anual' => 12,
+            default => 1,
+        };
+
+        // Comenzar desde la fecha de activación
+        $proximaFecha = $fechaActivacion->copy()->day($this->dia_ciclo);
+
+        // Si la fecha de activación es después del día del ciclo del mes actual,
+        // empezar desde el siguiente ciclo
+        if ($fechaActivacion->day > $this->dia_ciclo) {
+            $proximaFecha->addMonths($mesesPorCiclo);
         }
 
-        // Ajustar si el día no existe en el mes (ej: 31 en febrero)
-        $lastDayOfMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-        $day = min($this->dia_ciclo, $lastDayOfMonth);
-
-        try {
-            return sprintf('%04d-%02d-%02d', $year, $month, $day);
-        } catch (\Exception $e) {
-            return null;
+        // Avanzar hasta encontrar la próxima fecha futura
+        while ($proximaFecha->lessThanOrEqualTo($now)) {
+            $proximaFecha->addMonths($mesesPorCiclo);
         }
+
+        return $proximaFecha;
     }
 
     /**
