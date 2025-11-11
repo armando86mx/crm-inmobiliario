@@ -141,7 +141,7 @@ class ClienteResource extends Resource
 
                 Forms\Components\DateTimePicker::make('trial_ends_at')
                     ->label('Fin de Trial')
-                    ->visible(fn (Forms\Get $get) => $get('estado') === 'trial')
+                    ->visible(fn ($get) => $get('estado') === 'trial')
                     ->timezone('America/Mexico_City')
                     ->columnSpan(1),
 
@@ -152,19 +152,19 @@ class ClienteResource extends Resource
                         'semestral' => 'Semestral',
                         'anual' => 'Anual',
                     ])
-                    ->disabled(fn (Forms\Get $get) => $get('estado') === 'prospecto')
+                    ->disabled(fn ($get) => $get('estado') === 'prospecto')
                     ->columnSpan(1),
 
                 Forms\Components\Select::make('dia_ciclo')
                     ->label('Día de Ciclo de Facturación')
                     ->options(array_combine(range(1, 31), range(1, 31)))
-                    ->disabled(fn (Forms\Get $get) => $get('estado') === 'prospecto')
+                    ->disabled(fn ($get) => $get('estado') === 'prospecto')
                     ->columnSpan(1),
 
                 Forms\Components\DateTimePicker::make('fecha_activacion')
                     ->label('Fecha de Activación')
                     ->disabled()
-                    ->visible(fn (Forms\Get $get) => $get('estado') !== 'prospecto')
+                    ->visible(fn ($get) => $get('estado') !== 'prospecto')
                     ->timezone('America/Mexico_City')
                     ->columnSpan(1),
 
