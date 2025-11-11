@@ -250,11 +250,12 @@ class ClienteResource extends Resource
                         });
                     }),
 
-                Tables\Columns\TextColumn::make('slots_count')
-                    ->label('Slots')
-                    ->counts('slots')
-                    ->default(0)
-                    ->alignCenter(),
+                // COMENTADO TEMPORALMENTE - El modelo Slot aún no existe
+                // Tables\Columns\TextColumn::make('slots_count')
+                //     ->label('Slots')
+                //     ->counts('slots')
+                //     ->default(0)
+                //     ->alignCenter(),
 
                 Tables\Columns\TextColumn::make('proxima_facturacion')
                     ->label('Próxima Facturación')

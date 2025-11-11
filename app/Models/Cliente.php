@@ -71,11 +71,12 @@ class Cliente extends Model
 
     /**
      * Relación con Slot (preparado para futuro)
+     * COMENTADO TEMPORALMENTE - El modelo Slot aún no existe
      */
-    public function slots(): HasMany
-    {
-        return $this->hasMany(Slot::class, 'cliente_id');
-    }
+    // public function slots(): HasMany
+    // {
+    //     return $this->hasMany(Slot::class, 'cliente_id');
+    // }
 
     /**
      * Usuario que creó el registro
@@ -120,22 +121,22 @@ class Cliente extends Model
     /**
      * Computed property: Monto de renovación
      * Calcula el precio según slots actuales
+     * TEMPORALMENTE retorna 0 hasta que se implemente el modelo Slot
      */
     public function getMontoRenovacionAttribute(): float
     {
         // Por ahora retorna 0, se implementará cuando exista el modelo Slot
-        if (!class_exists(Slot::class)) {
-            return 0.0;
-        }
+        return 0.0;
 
-        $slotsBasicas = $this->slots()->where('tipo', 'basica')->count();
-        $slotsDestacadas = $this->slots()->where('tipo', 'destacada')->count();
-
-        // Precios ejemplo (ajustar según tu lógica de negocio)
-        $precioBasica = 100;
-        $precioDestacada = 200;
-
-        return ($slotsBasicas * $precioBasica) + ($slotsDestacadas * $precioDestacada);
+        // CÓDIGO COMENTADO TEMPORALMENTE - El modelo Slot aún no existe
+        // $slotsBasicas = $this->slots()->where('tipo', 'basica')->count();
+        // $slotsDestacadas = $this->slots()->where('tipo', 'destacada')->count();
+        //
+        // // Precios ejemplo (ajustar según tu lógica de negocio)
+        // $precioBasica = 100;
+        // $precioDestacada = 200;
+        //
+        // return ($slotsBasicas * $precioBasica) + ($slotsDestacadas * $precioDestacada);
     }
 
     /**
