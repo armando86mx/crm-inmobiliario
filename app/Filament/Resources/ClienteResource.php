@@ -30,165 +30,164 @@ class ClienteResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\Tabs::make('Información del Cliente')
-                    ->tabs([
-                        // TAB 1: Datos Fiscales
-                        Forms\Components\Tabs\Tab::make('Datos Fiscales')
-                            ->icon('heroicon-o-building-office-2')
+                // SECCIÓN 1: Datos Fiscales
+                Forms\Components\Section::make('Datos Fiscales')
+                    ->description('Información fiscal y de facturación del cliente')
+                    ->schema([
+                        Forms\Components\TextInput::make('razon_social')
+                            ->label('Razón Social')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+
+                        Forms\Components\TextInput::make('nombre_comercial')
+                            ->label('Nombre Comercial')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+
+                        Forms\Components\TextInput::make('rfc')
+                            ->label('RFC')
+                            ->required()
+                            ->maxLength(13)
+                            ->unique(ignoreRecord: true)
+                            ->regex('/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/')
+                            ->validationMessages([
+                                'regex' => 'El formato del RFC no es válido.',
+                            ])
+                            ->columnSpan(1),
+
+                        Forms\Components\TextInput::make('regimen_fiscal')
+                            ->label('Régimen Fiscal')
+                            ->required()
+                            ->maxLength(100)
+                            ->columnSpan(1),
+
+                        Forms\Components\Select::make('uso_cfdi')
+                            ->label('Uso CFDI')
+                            ->required()
+                            ->options([
+                                'G01' => 'G01 - Adquisición de mercancías',
+                                'G03' => 'G03 - Gastos en general',
+                                'P01' => 'P01 - Por definir',
+                            ])
+                            ->columnSpan(1),
+
+                        Forms\Components\TextInput::make('email_facturacion')
+                            ->label('Email de Facturación')
+                            ->email()
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpan(1),
+                    ])
+                    ->columns(2)
+                    ->collapsible(),
+
+                // SECCIÓN 2: Contactos
+                Forms\Components\Section::make('Contactos')
+                    ->description('Personas de contacto del cliente')
+                    ->schema([
+                        Forms\Components\Repeater::make('contactos')
+                            ->label('Contactos del Cliente')
+                            ->relationship('contactos')
                             ->schema([
-                                Forms\Components\TextInput::make('razon_social')
-                                    ->label('Razón Social')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->columnSpanFull(),
-
-                                Forms\Components\TextInput::make('nombre_comercial')
-                                    ->label('Nombre Comercial')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->columnSpanFull(),
-
-                                Forms\Components\TextInput::make('rfc')
-                                    ->label('RFC')
-                                    ->required()
-                                    ->maxLength(13)
-                                    ->unique(ignoreRecord: true)
-                                    ->regex('/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/')
-                                    ->validationMessages([
-                                        'regex' => 'El formato del RFC no es válido.',
-                                    ])
+                                Forms\Components\Checkbox::make('es_principal')
+                                    ->label('Es Principal')
+                                    ->reactive()
                                     ->columnSpan(1),
 
-                                Forms\Components\TextInput::make('regimen_fiscal')
-                                    ->label('Régimen Fiscal')
+                                Forms\Components\TextInput::make('nombre')
+                                    ->label('Nombre Completo')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(2),
+
+                                Forms\Components\TextInput::make('puesto')
+                                    ->label('Puesto')
                                     ->required()
                                     ->maxLength(100)
                                     ->columnSpan(1),
 
-                                Forms\Components\Select::make('uso_cfdi')
-                                    ->label('Uso CFDI')
-                                    ->required()
-                                    ->options([
-                                        'G01' => 'G01 - Adquisición de mercancías',
-                                        'G03' => 'G03 - Gastos en general',
-                                        'P01' => 'P01 - Por definir',
-                                    ])
-                                    ->columnSpan(1),
-
-                                Forms\Components\TextInput::make('email_facturacion')
-                                    ->label('Email de Facturación')
+                                Forms\Components\TextInput::make('email')
+                                    ->label('Email')
                                     ->email()
                                     ->required()
                                     ->maxLength(255)
+                                    ->columnSpan(2),
+
+                                Forms\Components\TextInput::make('telefono')
+                                    ->label('Teléfono')
+                                    ->tel()
+                                    ->maxLength(20)
                                     ->columnSpan(1),
                             ])
-                            ->columns(2),
-
-                        // TAB 2: Contactos
-                        Forms\Components\Tabs\Tab::make('Contactos')
-                            ->icon('heroicon-o-users')
-                            ->schema([
-                                Forms\Components\Repeater::make('contactos')
-                                    ->label('Contactos del Cliente')
-                                    ->relationship('contactos')
-                                    ->schema([
-                                        Forms\Components\Checkbox::make('es_principal')
-                                            ->label('Es Principal')
-                                            ->reactive()
-                                            ->columnSpan(1),
-
-                                        Forms\Components\TextInput::make('nombre')
-                                            ->label('Nombre Completo')
-                                            ->required()
-                                            ->maxLength(255)
-                                            ->columnSpan(2),
-
-                                        Forms\Components\TextInput::make('puesto')
-                                            ->label('Puesto')
-                                            ->required()
-                                            ->maxLength(100)
-                                            ->columnSpan(1),
-
-                                        Forms\Components\TextInput::make('email')
-                                            ->label('Email')
-                                            ->email()
-                                            ->required()
-                                            ->maxLength(255)
-                                            ->columnSpan(2),
-
-                                        Forms\Components\TextInput::make('telefono')
-                                            ->label('Teléfono')
-                                            ->tel()
-                                            ->maxLength(20)
-                                            ->columnSpan(1),
-                                    ])
-                                    ->columns(3)
-                                    ->minItems(1)
-                                    ->reorderable(true)
-                                    ->orderColumn('orden')
-                                    ->addActionLabel('Añadir Contacto')
-                                    ->itemLabel(fn (array $state): ?string => $state['nombre'] ?? null)
-                                    ->collapsible()
-                                    ->columnSpanFull(),
-                            ]),
-
-                        // TAB 3: Estado y Contrato
-                        Forms\Components\Tabs\Tab::make('Estado y Contrato')
-                            ->icon('heroicon-o-document-text')
-                            ->schema([
-                                Forms\Components\Select::make('estado')
-                                    ->label('Estado')
-                                    ->required()
-                                    ->options([
-                                        'prospecto' => 'Prospecto',
-                                        'trial' => 'Trial',
-                                        'activo' => 'Activo',
-                                        'pausado' => 'Pausado',
-                                        'vencido' => 'Vencido',
-                                        'suspendido' => 'Suspendido',
-                                        'cancelado' => 'Cancelado',
-                                    ])
-                                    ->default('prospecto')
-                                    ->reactive()
-                                    ->columnSpan(1),
-
-                                Forms\Components\DateTimePicker::make('trial_ends_at')
-                                    ->label('Fin de Trial')
-                                    ->visible(fn (Forms\Get $get) => $get('estado') === 'trial')
-                                    ->timezone('America/Mexico_City')
-                                    ->columnSpan(1),
-
-                                Forms\Components\Select::make('frecuencia')
-                                    ->label('Frecuencia de Pago')
-                                    ->options([
-                                        'mensual' => 'Mensual',
-                                        'semestral' => 'Semestral',
-                                        'anual' => 'Anual',
-                                    ])
-                                    ->disabled(fn (Forms\Get $get) => $get('estado') === 'prospecto')
-                                    ->columnSpan(1),
-
-                                Forms\Components\Select::make('dia_ciclo')
-                                    ->label('Día de Ciclo de Facturación')
-                                    ->options(array_combine(range(1, 31), range(1, 31)))
-                                    ->disabled(fn (Forms\Get $get) => $get('estado') === 'prospecto')
-                                    ->columnSpan(1),
-
-                                Forms\Components\DateTimePicker::make('fecha_activacion')
-                                    ->label('Fecha de Activación')
-                                    ->disabled()
-                                    ->visible(fn (Forms\Get $get) => $get('estado') !== 'prospecto')
-                                    ->timezone('America/Mexico_City')
-                                    ->columnSpan(1),
-
-                                Forms\Components\Textarea::make('observaciones')
-                                    ->label('Observaciones')
-                                    ->rows(4)
-                                    ->columnSpanFull(),
-                            ])
-                            ->columns(2),
+                            ->columns(3)
+                            ->minItems(1)
+                            ->reorderable(true)
+                            ->orderColumn('orden')
+                            ->addActionLabel('Añadir Contacto')
+                            ->itemLabel(fn (array $state): ?string => $state['nombre'] ?? null)
+                            ->collapsible()
+                            ->columnSpanFull(),
                     ])
-                    ->columnSpanFull(),
+                    ->collapsible(),
+
+                // SECCIÓN 3: Estado y Contrato
+                Forms\Components\Section::make('Estado y Contrato')
+                    ->description('Estado del cliente y configuración de contrato')
+                    ->schema([
+                        Forms\Components\Select::make('estado')
+                            ->label('Estado')
+                            ->required()
+                            ->options([
+                                'prospecto' => 'Prospecto',
+                                'trial' => 'Trial',
+                                'activo' => 'Activo',
+                                'pausado' => 'Pausado',
+                                'vencido' => 'Vencido',
+                                'suspendido' => 'Suspendido',
+                                'cancelado' => 'Cancelado',
+                            ])
+                            ->default('prospecto')
+                            ->reactive()
+                            ->columnSpan(1),
+
+                        Forms\Components\DateTimePicker::make('trial_ends_at')
+                            ->label('Fin de Trial')
+                            ->visible(fn (Forms\Get $get) => $get('estado') === 'trial')
+                            ->timezone('America/Mexico_City')
+                            ->columnSpan(1),
+
+                        Forms\Components\Select::make('frecuencia')
+                            ->label('Frecuencia de Pago')
+                            ->options([
+                                'mensual' => 'Mensual',
+                                'semestral' => 'Semestral',
+                                'anual' => 'Anual',
+                            ])
+                            ->disabled(fn (Forms\Get $get) => $get('estado') === 'prospecto')
+                            ->columnSpan(1),
+
+                        Forms\Components\Select::make('dia_ciclo')
+                            ->label('Día de Ciclo de Facturación')
+                            ->options(array_combine(range(1, 31), range(1, 31)))
+                            ->disabled(fn (Forms\Get $get) => $get('estado') === 'prospecto')
+                            ->columnSpan(1),
+
+                        Forms\Components\DateTimePicker::make('fecha_activacion')
+                            ->label('Fecha de Activación')
+                            ->disabled()
+                            ->visible(fn (Forms\Get $get) => $get('estado') !== 'prospecto')
+                            ->timezone('America/Mexico_City')
+                            ->columnSpan(1),
+
+                        Forms\Components\Textarea::make('observaciones')
+                            ->label('Observaciones')
+                            ->rows(4)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->collapsible(),
             ]);
     }
 
