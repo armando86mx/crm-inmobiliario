@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -141,36 +142,51 @@ class Cliente extends Model
 
     /**
      * Computed property: Próxima fecha de facturación
-     * Calcula fecha según dia_ciclo
+     * Calcula fecha según dia_ciclo y frecuencia
      */
-    public function getProximaFacturacionAttribute(): ?string
+    public function getProximaFacturacionAttribute(): ?Carbon
     {
-        if ($this->estado === 'prospecto' || !$this->dia_ciclo || !$this->fecha_activacion) {
+        // 1. Si estado != 'activo' → retornar null
+        if ($this->estado !== 'activo') {
             return null;
         }
 
-        $now = now();
-        $year = $now->year;
-        $month = $now->month;
-
-        // Si el día del ciclo ya pasó este mes, calcular para el próximo mes
-        if ($now->day >= $this->dia_ciclo) {
-            $month++;
-            if ($month > 12) {
-                $month = 1;
-                $year++;
-            }
-        }
-
-        // Ajustar si el día no existe en el mes (ej: 31 en febrero)
-        $lastDayOfMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-        $day = min($this->dia_ciclo, $lastDayOfMonth);
-
-        try {
-            return sprintf('%04d-%02d-%02d', $year, $month, $day);
-        } catch (\Exception $e) {
+        // 2. Si frecuencia es null o dia_ciclo es null → retornar null
+        if (!$this->frecuencia || !$this->dia_ciclo) {
             return null;
         }
+
+        // 3. Si no hay fecha_activacion → retornar null
+        if (!$this->fecha_activacion) {
+            return null;
+        }
+
+        // Determinar meses a sumar según frecuencia
+        $mesesASumar = match ($this->frecuencia) {
+            'mensual' => 1,
+            'semestral' => 6,
+            'anual' => 12,
+            default => 1,
+        };
+
+        // Partir de la fecha de activación
+        $fechaBase = Carbon::parse($this->fecha_activacion);
+        $hoy = Carbon::now();
+
+        // Encontrar la próxima fecha de facturación
+        $proximaFecha = $fechaBase->copy()->day($this->dia_ciclo);
+
+        // Si la fecha base con el día de ciclo ya pasó, avanzar al siguiente periodo
+        if ($proximaFecha->lt($fechaBase)) {
+            $proximaFecha->addMonths($mesesASumar);
+        }
+
+        // Seguir sumando periodos hasta encontrar una fecha futura
+        while ($proximaFecha->lte($hoy)) {
+            $proximaFecha->addMonths($mesesASumar);
+        }
+
+        return $proximaFecha;
     }
 
     /**
